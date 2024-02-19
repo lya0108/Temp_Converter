@@ -23,12 +23,12 @@ class converter:
         self.temp_frame = Frame(padx=10, pady=10)
         self.temp_frame.grid()
 
-        self.temp_heading = Label(self.temp_frame, text="Temperature Converter", font=("Arial", "18", "bold"))
+        self.temp_heading = Label(self.temp_frame, text="Temperature Converter", font=("Arial", "30", "bold"))
         self.temp_heading.grid(row=0)
 
         instructions = "Please Enter a Temperature Below and Then Press One of The Buttons to Convert it From Centigrade to Fahrenheit."
 
-        self.temp_instructions = Label(self.temp_frame, text=instructions, wrap=250, width=40, justify="left")
+        self.temp_instructions = Label(self.temp_frame, text=instructions, font=("Arial", "12"), wrap=300, justify="left")
         self.temp_instructions.grid(row=1)
 
         self.temp_entry = Entry(self.temp_frame, font=("Arial", "15"))
