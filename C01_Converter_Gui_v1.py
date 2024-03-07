@@ -239,7 +239,7 @@ class HistoryExport:
         # if user closes the history frame 'releases' history button
         self.history_box.protocol("WM_DELETE_WINDOW", partial(self.close_history, partner))
 
-        self.history_frame = Frame(self.history_box, width=300, height=200)
+        self.history_frame = Frame(self.history_box, width=350, height=200)
         self.history_frame.grid()
 
         self.history_heading_label = Label(self.history_frame, text="History / Export", font=("Arial", "30", "bold"))
@@ -258,15 +258,14 @@ class HistoryExport:
         
         # history text and label
         hist_text = "{} \n\nall calculations are shown to the nearest".format(showing_all)
-        histinstructions = "Below are Your Recent Calculations\nShowing 3/3 Calculations.\nAll Calculations are Shown to The Nearest Degree"
-        self.hist_instructions = Label(self.history_frame, text=histinstructions, font=("Arial", "12"), wraplength=300, justify=CENTER)
+        self.hist_instructions = Label(self.history_frame, text=hist_text, font=("Arial", "12"), wraplength=300, justify=CENTER)
         self.hist_instructions.grid(row=1)
 
-        self.all_calcs = Label(self.history_frame, text="Calculations Go here", font=("Arial", "12"), bg="#ffe6cc", padx=10, pady=10, justify=CENTER)
+        self.all_calcs = Label(self.history_frame, text=calc_string_text, font=("Arial", "12"), bg=calc_background, padx=10, pady=10, justify=CENTER)
         self.all_calcs.grid(row=2)
 
         savetext = "Either Choose a Custom File Name (and push\n<Export>) or Simply Push <Export> to Save Your\nCalculations in a Text File. If the\n Filename Already Exists, it Will be Overwritten"
-        self.save_text = Label(self.history_frame, text=savetext, font=("Arial", "12"), wrap=300, padx=10, pady=10, justify=CENTER)
+        self.save_text = Label(self.history_frame, text=savetext, font=("Arial", "12"), padx=10, pady=10, justify=CENTER)
         self.save_text.grid(row=3)
 
         self.filename_entry = Entry(self.history_frame, font=("Arial", "14"), bg="#ffffff", width=25)
@@ -278,7 +277,7 @@ class HistoryExport:
         self.returbut_frame = Frame(self.history_frame)
         self.returbut_frame.grid(row=6)
         
-        self.export_button = Button(self.returbut_frame, font=("Arial", "15", "bold"), bg="#004c99", fg="white", width=12, state=DISABLED, command=lambda: setiojtigigweiugfwhgiuwfhwiufwhiufhiuwhiuf)
+        self.export_button = Button(self.returbut_frame, text="Export", font=("Arial", "15", "bold"), bg="#004c99", fg="white", width=12, state=DISABLED)
         self.export_button.grid(row=0, column=0, padx=10, pady=10)
 
         self.return_button = Button(self.returbut_frame, text="Return", font=("Arial", "15", "bold"), bg="#666666", fg="white", command=partial(self.close_history, partner)) 
@@ -296,23 +295,13 @@ class HistoryExport:
             stop = len(var_calculations)
 
         for item in range(0, stop-1):
-            calc_string += var_calculations[len(var_calculations)-item-1]
+            calc_string += var_calculations[len(var_calculations)- item - 1]
             calc_string += "\n"
 
-        calc_string += var_calculations[-max_calcs]
+        calc_string += var_calculations[-stop]
 
         return calc_string
         
-
-
-
-
-
-
-
-
-
-
 
 
 
