@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import *
 import math
 from functools import partial # prevents unwanted windows
+from datetime import date
+import re
 
 class converter:
     def __init__(self):
@@ -210,13 +212,11 @@ class DisplayHelp:
 ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⢀⣀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⢀⣙⣟⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣘⣛⣻⣦⢀⣀⣙⣛⣛⣛⣛⣻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿""", font=("Arial", "3"), bg=background)
         self.idk.grid(row=3, padx=10, pady=10)
 
-
-
     # closes help dialogue
     def close_help(self, partner):
-        # set help button back to normal
-        partner.temp_help_button.config(state=NORMAL)
-        self.help_box.destroy()
+            # set help button back to normal
+            partner.temp_help_button.config(state=NORMAL)
+            self.help_box.destroy()
 
 class HistoryExport:
     def __init__(self, partner, calc_list):
@@ -226,6 +226,11 @@ class HistoryExport:
         max_calcs = 5
         self.var_max_calcs = IntVar()
         self.var_max_calcs.set(max_calcs)
+
+        # set filename and date variables
+        self.var_filename = StringVar()
+        self.var_todays_date = StringVar()
+        self.var_calc_list = StringVar()
 
         #converts content of calc list into a string
         calc_string_text = self.get_calc_string(calc_list)
@@ -271,13 +276,13 @@ class HistoryExport:
         self.filename_entry = Entry(self.history_frame, font=("Arial", "14"), bg="#ffffff", width=25)
         self.filename_entry.grid(row=4, padx=10, pady=10)
 
-        self.filename_error = Label(self.history_frame, text="Filename Error Goes Here", font=("Arial", "12", "bold"), fg="#9c0000")
-        self.filename_error.grid(row=5)
+        self.filename_feedback = Label(self.history_frame, text="", font=("Arial", "12", "bold"), fg="#9c0000", wraplength=300)
+        self.filename_feedback.grid(row=5)
 
         self.returbut_frame = Frame(self.history_frame)
         self.returbut_frame.grid(row=6)
         
-        self.export_button = Button(self.returbut_frame, text="Export", font=("Arial", "15", "bold"), bg="#004c99", fg="white", width=12, state=DISABLED)
+        self.export_button = Button(self.returbut_frame, text="Export", font=("Arial", "15", "bold"), bg="#004c99", fg="white", width=12, command=self.make_file)
         self.export_button.grid(row=0, column=0, padx=10, pady=10)
 
         self.return_button = Button(self.returbut_frame, text="Return", font=("Arial", "15", "bold"), bg="#666666", fg="white", command=partial(self.close_history, partner)) 
@@ -287,6 +292,13 @@ class HistoryExport:
         # get maximum calcs to display
         max_calcs = self.var_max_calcs.get()
         calc_string = ""
+
+        oldest_first = ""
+        for item in var_calculations:
+            oldest_first += item
+            oldest_first += "\n"
+
+        self.var_calc_list.set(oldest_first)
 
         if len(var_calculations) >= max_calcs:
             stop = max_calcs                                         
@@ -302,8 +314,98 @@ class HistoryExport:
 
         return calc_string
         
+    def make_file(self):
+        # retrieve filename
+        filename = self.filename_entry.get()
 
+        filename_ok = ""
+        date_part = self.get_date()
 
+        if filename == "":
+            # get date and create default filename
+            filename = f"{date_part}_Temperature_Calculations"
+        
+        else:
+            # check that filename is valid
+            filename_ok = self.check_filename(filename)
+
+        if filename_ok == "":
+            filename += ".txt"
+            success = "Your calculations have  " \
+                      "been saved (filename: {})".format(filename)
+            self.var_filename.set(filename)
+            self.filename_feedback.config(text=success, fg="dark green")
+            self.filename_entry.config(bg="#FFFFFF")
+
+            # write to file
+            self.write_to_file()
+        
+        else:
+            self.filename_feedback.config(text=filename_ok, fg="dark red")
+            self.filename_entry.config(bg="#F8CECC")
+
+    # retrieves date and creates dd_mm_yyyy string
+    def get_date(self):
+        today = date.today()
+
+        day = today.strftime("%d")
+        month = today.strftime("%m")
+        year = today.strftime("%y")
+
+        todays_date = f"{day}/{month}/{year}"
+        self.var_todays_date.set(todays_date)
+
+        return f"{day}_{month}_{year}"
+
+    # checks filename only has letters, numbers, underscores. returns either "" if ok or the problem if error
+    @staticmethod
+    def check_filename(filename):
+        problem = ""
+
+        # regular expression to check if filename is valid
+        valid_char = "[A-Za-z0-9_]"
+
+        # iterates through filename and checks each letter
+        for letter in filename:
+            if re.match(valid_char, letter):
+                continue
+        
+            elif letter == "":
+                problem = "Sorry, no spaces allowed"
+
+            else:
+                problem = f"Sorry, no {letter}'s allowed"
+            
+            break
+            
+        if problem != "":
+            problem = f"{problem}. use letters / numbers / underscores only"
+
+        return problem
+    
+    def write_to_file(self):
+        # retrieve date, filename and calc history
+        filename = self.var_filename.get()
+        generated_date = self.var_todays_date.get()
+
+        # setup strings to write to file
+        heading = "==== Temperature Calculation ===="
+        generated = f"Generated: {generated_date}\n"
+        sub_heading = "Here is Your Calculation History (Oldest to Newest)...\n"
+        all_calculations = self.var_calc_list.get()
+
+        to_output_list = [heading, generated, sub_heading, all_calculations]
+
+        # write to file
+        # write output to file
+        text_file = open(filename, "w+")
+
+        for item in to_output_list:
+            text_file.write(item)
+            text_file.write("\n")
+        
+        # close file
+        text_file.close()
 
     # closes history dialogue
     def close_history(self, partner):
